@@ -1,8 +1,62 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import { ref } from "vue";
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const items = ref([
+  {
+    label: 'Home',
+    icon: 'pi pi-home',
+    command: () => {
+      router.push({name: 'home'})
+    }
+  },
+  // {
+  //   label: 'Features',
+  //   icon: 'pi pi-star'
+  // },
+  // {
+  //   label: 'Projects',
+  //   icon: 'pi pi-search',
+  //   items: [
+  //     {
+  //       label: 'Components',
+  //       icon: 'pi pi-bolt'
+  //     },
+  //     {
+  //       label: 'Blocks',
+  //       icon: 'pi pi-server'
+  //     },
+  //     {
+  //       label: 'UI Kit',
+  //       icon: 'pi pi-pencil'
+  //     },
+  //     {
+  //       label: 'Templates',
+  //       icon: 'pi pi-palette',
+  //       items: [
+  //         {
+  //           label: 'Apollo',
+  //           icon: 'pi pi-palette'
+  //         },
+  //         {
+  //           label: 'Ultima',
+  //           icon: 'pi pi-palette'
+  //         }
+  //       ]
+  //     }
+  //   ]
+  // },
+  // {
+  //   label: 'Contact',
+  //   icon: 'pi pi-envelope'
+  // }
+]);
 </script>
 
 <script lang="ts">
+import Menubar from 'primevue/menubar';
 import Button from "primevue/button";
 
 export default {
@@ -24,6 +78,23 @@ export default {
 </script>
 
 <template>
+  <Menubar :model="items" />
+
+
+  <br/>
+  <br/>
+
+  <RouterLink :to="{name: 'route1'}">Link 1</RouterLink>
+  <RouterLink :to="{name: 'route2'}">Link 2</RouterLink>
+
+  <strong>Current route path:</strong> {{ $route.fullPath }}
+
+  <br/>
+  <br/>
+
+  <RouterView />
+
+
   <Button label="Primary" raised @click="f1" />
   <Button label="Secondary" severity="secondary" raised />
   <Button label="Success" severity="success" raised />
