@@ -14,11 +14,13 @@ import './sass/style.sass'
 
 
 import Home from './Home.vue'
+import Extensions from './Extensions.vue'
 import HomeView from './components/HelloWorld.vue'
 import AboutView from './components/About.vue'
 
 const routes = [
     { path: '/', name: 'home', component: Home },
+    { path: '/extensions', name: 'extensions', component: Extensions },
     { path: '/route1', name: 'route1', component: HomeView },
     { path: '/route2', name: 'route2', component: AboutView },
 ]
