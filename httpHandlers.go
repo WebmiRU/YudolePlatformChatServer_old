@@ -42,7 +42,7 @@ func modulesIdHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func modulesIdSetStateHandler(w http.ResponseWriter, r *http.Request) {
+func modulesIdSetAutostartHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Allow", "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS")
@@ -61,13 +61,13 @@ func modulesIdSetStateHandler(w http.ResponseWriter, r *http.Request) {
 		model := GetModulesResponse{modules}
 		response, _ := json.Marshal(model)
 
-		if state == "1" && modules[id].IsActive {
+		if state == "1" && modules[id].Autostart {
 			fmt.Println("11")
-		} else if state == "1" && !modules[id].IsActive {
+		} else if state == "1" && !modules[id].Autostart {
 			fmt.Println("10")
-		} else if state == "0" && modules[id].IsActive {
+		} else if state == "0" && modules[id].Autostart {
 			fmt.Println("01")
-		} else if state == "0" && !modules[id].IsActive {
+		} else if state == "0" && !modules[id].Autostart {
 			fmt.Println("00")
 		}
 

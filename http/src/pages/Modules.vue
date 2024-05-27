@@ -20,6 +20,10 @@ export default {
     ]
 
     this.model = await APIService.getModules()
+
+    setInterval(async () => {
+      this.model = await APIService.getModules()
+    }, 2000)
   },
   methods: {
     moduleStateChange(id, state) {
@@ -38,16 +42,24 @@ export default {
   <DataTable :value="model.payload" tableStyle="min-width: 50rem">
     <Column field="name" header="Name"></Column>
 
-    <Column header="On/Off">
+    <Column header="Autostart">
       <template #body="row">
-        <InputSwitch v-model="model.payload[row.index].is_active" @change="moduleStateChange(row.index, model.payload[row.index].is_active)" />
+        <InputSwitch v-model="model.payload[row.index].autostart" @change="moduleStateChange(row.index, model.payload[row.index].autostart)" />
       </template>
     </Column>
 
     <Column header="Active">
       <template #body="row">
-        <Badge v-if="row.data.is_active" severity="success">Active</Badge>
-        <Badge v-else severity="danger">Inactive</Badge>
+        <Badge v-if="row.data.proc_state == 'run'" severity="success">Run</Badge>
+        <Badge v-else-if="row.data.proc_state == 'stopped'" severity="warning">Stopped</Badge>
+        <Badge v-else-if="row.data.proc_state == 'failed'" severity="danger">Failed</Badge>
+      </template>
+    </Column>
+
+    <Column header="Start/Stop">
+      <template #body="row">
+        <Button v-if="row.data.proc_state == 'run'" severity="danger">Stop</Button>
+        <Button v-if="['stopped', 'failed'].includes(row.data.proc_state)" severity="success">Start</Button>
       </template>
     </Column>
 

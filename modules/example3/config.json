@@ -1,5 +1,5 @@
 {
   "name": "Youtube client",
   "type": "client",
-  "command": "./youtube_client.exe"
+  "command": ""
 }

@@ -1,8 +1,8 @@
 {
-  "name": "Trovo client",
+  "name": "Example 1 module",
   "description": "Trovo client module description",
   "type": "client",
-  "command": "./trovo_client.exe",
+  "command": "./example1.exe",
   "params": {
     "Auth": {
       "login": {

@@ -1,17 +1,21 @@
 package main
 
+import "os/exec"
+
 type Config struct {
-	ActiveModules []string `json:"active_modules"`
+	AutostartModules []string `json:"active_modules"`
 }
 
 type Module struct {
 	//Key      string                                  `json:"key"`
-	IsActive bool                                    `json:"is_active"`
-	Name     string                                  `json:"name"`
-	Type     string                                  `json:"type"`
-	Command  string                                  `json:"command"`
-	Path     string                                  `json:"path"`
-	Params   map[string]map[string]ModuleConfigParam `json:"params"`
+	Autostart bool                                    `json:"autostart"`
+	Name      string                                  `json:"name"`
+	Type      string                                  `json:"type"`
+	Command   string                                  `json:"command"`
+	Path      string                                  `json:"path"`
+	Params    map[string]map[string]ModuleConfigParam `json:"params"`
+	Exec      *exec.Cmd                               `json:"-"`
+	ProcState string                                  `json:"proc_state"`
 }
 
 type ModuleConfigParam struct {
@@ -23,9 +27,9 @@ type ModuleConfigParam struct {
 }
 
 type GetModulesIdResponse struct {
-	Payload Module `json:"payload"`
+	Payload *Module `json:"payload"`
 }
 
 type GetModulesResponse struct {
-	Payload map[string]Module `json:"payload"`
+	Payload map[string]*Module `json:"payload"`
 }
