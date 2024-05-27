@@ -28,13 +28,19 @@ export default {
 </script>
 
 <template>
-  {{model.payload}}
   <h1>Module {{$route.params.id}} params</h1>
 
   <TabView>
-<!--    <TabPanel v-for="tab in Object.keys(model.payload.params)" :key="tab" :header="tab">-->
-<!--      <p class="m-0">{{ tab }}</p>-->
-<!--    </TabPanel>-->
+    <TabPanel v-for="key in Object.keys(model.payload.params)" :key="key" :header="key">
+      <div v-for="field in model.payload.params[key]" class="field flex flex-column gap-1 mb-5">
+          <label v-if="field.label.length">{{ field.label }}</label>
+          <InputText v-if="field.type == 'string'" v-model="value" />
+          <InputNumber v-else-if="field.type == 'number'" v-model="value" />
+
+          <small v-if="field.description.length">{{field.description}}</small>
+      </div>
+
+    </TabPanel>
   </TabView>
 </template>
 

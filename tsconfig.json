@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "target": "es2016",
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "moduleResolution": "node"
 //    "module": "commonjs",
 //    "esModuleInterop": true,
 //    "forceConsistentCasingInFileNames": true,

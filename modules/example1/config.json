@@ -8,6 +8,7 @@
       "login": {
         "type": "string",
         "label": "Login",
+        "description": "Login field long description",
         "placeholder": "Login",
         "validation": ""
       },

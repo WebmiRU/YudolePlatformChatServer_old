@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import {ref} from "vue";
+import {useRouter} from "vue-router";
 import store from "./store"
 
 const router = useRouter();
@@ -10,7 +10,7 @@ const items = ref([
     label: 'Home',
     icon: 'pi pi-home',
     command: () => {
-      router.push({name: 'home'})
+      router.push({name: 'index'})
     }
   },
   {
@@ -68,29 +68,23 @@ const items = ref([
 export default {
   components: {},
   data() {
-    return {
-
-    }
+    return {}
   },
   mounted() {
 
   },
-  methods: {
-    f1() {
-      alert('F1')
-    }
-  }
-  }
+  methods: {}
+}
 </script>
 
 <template>
-  <Menubar :model="items" />
+  <Menubar :model="items"/>
 
-  <Breadcrumb :model="store.breadcrumbs">
+  <Breadcrumb v-if="store.breadcrumbs.length > 1" :model="store.breadcrumbs">
     <template #item="{ item, props }">
       <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
         <a :href="href" v-bind="props.action" @click="navigate">
-          <span :class="[item.icon, 'text-color']" />
+          <span :class="[item.icon, 'text-color']"/>
           <span class="text-primary font-semibold">{{ item.label }}</span>
         </a>
       </router-link>
@@ -100,21 +94,21 @@ export default {
     </template>
   </Breadcrumb>
 
-<!--  <RouterLink :to="{name: 'route1'}">Link 1</RouterLink>-->
-<!--  <RouterLink :to="{name: 'route2'}">Link 2</RouterLink>-->
+  <!--  <RouterLink :to="{name: 'route1'}">Link 1</RouterLink>-->
+  <!--  <RouterLink :to="{name: 'route2'}">Link 2</RouterLink>-->
 
-<!--  <strong>Current route path:</strong> {{ $route.fullPath }}-->
+  <!--  <strong>Current route path:</strong> {{ $route.fullPath }}-->
 
-  <RouterView />
+  <RouterView/>
 
 
-<!--  <Button label="Primary" raised @click="f1" />-->
-<!--  <Button label="Secondary" severity="secondary" raised />-->
-<!--  <Button label="Success" severity="success" raised />-->
-<!--  <Button label="Info" severity="info" raised />-->
-<!--  <Button label="Warning" severity="warning" raised />-->
-<!--  <Button label="Help" severity="help" raised />-->
-<!--  <Button label="Danger" severity="danger" raised />-->
-<!--  <Button label="Contrast" severity="contrast" raised />-->
+  <!--  <Button label="Primary" raised @click="f1" />-->
+  <!--  <Button label="Secondary" severity="secondary" raised />-->
+  <!--  <Button label="Success" severity="success" raised />-->
+  <!--  <Button label="Info" severity="info" raised />-->
+  <!--  <Button label="Warning" severity="warning" raised />-->
+  <!--  <Button label="Help" severity="help" raised />-->
+  <!--  <Button label="Danger" severity="danger" raised />-->
+  <!--  <Button label="Contrast" severity="contrast" raised />-->
 
 </template>

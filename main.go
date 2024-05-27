@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -43,32 +44,16 @@ func main() {
 
 		//module.Key = ext.Name()
 		module.Path = currentDir + string(os.PathSeparator) + "modules" + string(os.PathSeparator) + ext.Name()
+		module.IsActive = slices.Contains(config.ActiveModules, ext.Name())
 
 		modules[ext.Name()] = module
 	}
-
-	//http.HandleFunc("/api/modules", func(w http.ResponseWriter, r *http.Request) {
-	//	w.Header().Set("Content-Type", "application/json")
-	//	w.Header().Set("Access-Control-Allow-Origin", "*")
-	//
-	//	data := GetModulesResponse{modules}
-	//	response, _ := json.Marshal(data)
-	//
-	//	w.Write(response)
-	//})
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", indexHandler)
 	router.HandleFunc("/api/modules", modulesHandler)
 	router.HandleFunc("/api/modules/{id}", modulesIdHandler)
 	http.Handle("/", router)
-
-	//fmt.Println("Server is listening...")
-	//http.ListenAndServe(":8181", nil)
-
-	//http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-	//	fmt.Fprintf(w, "Hello World!")
-	//})
 
 	http.ListenAndServe(":80", nil)
 }
