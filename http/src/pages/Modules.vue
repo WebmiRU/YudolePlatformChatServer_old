@@ -22,8 +22,8 @@ export default {
     this.model = await APIService.getModules()
   },
   methods: {
-    f1(v) {
-      console.log(v)
+    moduleStateChange(id, state) {
+      APIService.putModulesIdSetState(id, state ? 1 : 0)
     }
   }
 }
@@ -40,7 +40,7 @@ export default {
 
     <Column header="On/Off">
       <template #body="row">
-        <InputSwitch v-model="checked" />
+        <InputSwitch v-model="model.payload[row.index].is_active" @change="moduleStateChange(row.index, model.payload[row.index].is_active)" />
       </template>
     </Column>
 

@@ -51,8 +51,9 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", indexHandler)
-	router.HandleFunc("/api/modules", modulesHandler)
+	router.HandleFunc("/api/modules", modulesIndexHandler)
 	router.HandleFunc("/api/modules/{id}", modulesIdHandler)
+	router.HandleFunc("/api/modules/{id}/state/{state:[0,1]}", modulesIdSetStateHandler)
 	http.Handle("/", router)
 
 	http.ListenAndServe(":80", nil)
