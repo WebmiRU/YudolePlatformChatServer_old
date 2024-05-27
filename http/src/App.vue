@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
+import store from "./store"
 
 const router = useRouter();
 
@@ -13,10 +14,10 @@ const items = ref([
     }
   },
   {
-    label: 'Extensions',
+    label: 'Modules',
     icon: 'pi pi-box',
     command: () => {
-      router.push({name: 'extensions'})
+      router.push({name: 'modules.index'})
     }
   },
   // {
@@ -63,11 +64,9 @@ const items = ref([
 </script>
 
 <script lang="ts">
-import Menubar from 'primevue/menubar';
-import Button from "primevue/button";
 
 export default {
-  components: {Button},
+  components: {},
   data() {
     return {
 
@@ -87,10 +86,24 @@ export default {
 <template>
   <Menubar :model="items" />
 
-  <RouterLink :to="{name: 'route1'}">Link 1</RouterLink>
-  <RouterLink :to="{name: 'route2'}">Link 2</RouterLink>
+  <Breadcrumb :model="store.breadcrumbs">
+    <template #item="{ item, props }">
+      <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
+        <a :href="href" v-bind="props.action" @click="navigate">
+          <span :class="[item.icon, 'text-color']" />
+          <span class="text-primary font-semibold">{{ item.label }}</span>
+        </a>
+      </router-link>
+      <a v-else :href="item.url" :target="item.target" v-bind="props.action">
+        <span class="text-color">{{ item.label }}</span>
+      </a>
+    </template>
+  </Breadcrumb>
 
-  <strong>Current route path:</strong> {{ $route.fullPath }}
+<!--  <RouterLink :to="{name: 'route1'}">Link 1</RouterLink>-->
+<!--  <RouterLink :to="{name: 'route2'}">Link 2</RouterLink>-->
+
+<!--  <strong>Current route path:</strong> {{ $route.fullPath }}-->
 
   <RouterView />
 

@@ -1,0 +1,5 @@
+{
+  "name": "Twitch client",
+  "type": "client",
+  "command": "./twitch_client.exe"
+}
