@@ -18,6 +18,7 @@ type Module struct {
 	Params    map[string]map[string]Params `json:"params"`
 	Exec      *exec.Cmd                    `json:"-"`
 	State     string                       `json:"proc_state"`
+	isRunning bool
 }
 
 func (m *Module) Load(configPath string) error {
@@ -28,13 +29,8 @@ func (m *Module) Load(configPath string) error {
 		return err
 	}
 
-	if len(m.Command) >= 2 {
-		if m.Command[0:2] == "./" {
-			m.Command = m.Dir + string(os.PathSeparator) + strings.Replace(m.Command, "./", "", 1)
-		}
-
-		m.Exec = exec.Command(m.Command)
-		m.Exec.Dir = m.Dir
+	if len(m.Command) >= 2 && m.Command[0:2] == "./" {
+		m.Command = m.Dir + string(os.PathSeparator) + strings.Replace(m.Command, "./", "", 1)
 	}
 
 	//if m.Autostart && m.Exec != nil {
@@ -45,11 +41,14 @@ func (m *Module) Load(configPath string) error {
 }
 
 func (m *Module) Start() error {
-	if m.Exec == nil {
+	if len(m.Command) > 0 && !m.isRunning {
+		m.Exec = exec.Command(m.Command)
+		m.Exec.Dir = m.Dir
+	} else {
 		return nil
 	}
-	m.State = "pending"
 
+	m.isRunning = true
 	if err := m.Exec.Start(); err != nil {
 		m.State = "failed"
 		return err
@@ -65,12 +64,18 @@ func (m *Module) Start() error {
 			m.State = "failed"
 			log.Printf("Module %s failed: %s", cmd.Path, err)
 		}
+
+		m.isRunning = false
 	}(m.Exec)
 
 	return nil
 }
 
 func (m *Module) Stop() error {
+	if err := m.Exec.Process.Kill(); err != nil {
+		return err
+	}
+
 	return nil
 }
 

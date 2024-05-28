@@ -53,6 +53,8 @@ func main() {
 	router.HandleFunc("/", indexHandler)
 	router.HandleFunc("/api/modules", modulesIndexHandler)
 	router.HandleFunc("/api/modules/{id}", modulesIdHandler)
+	router.HandleFunc("/api/modules/{id}/start", modulesIdStartHandler)
+	router.HandleFunc("/api/modules/{id}/stop", modulesIdStopHandler)
 	router.HandleFunc("/api/modules/{id}/autostart/{state:[0,1]}", modulesIdSetAutostartHandler)
 	http.Handle("/", router)
 

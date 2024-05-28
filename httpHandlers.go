@@ -8,6 +8,13 @@ import (
 	"net/http"
 )
 
+func setCorsJsonHeaders(w *http.ResponseWriter) {
+	(*w).Header().Set("Content-Type", "application/json")
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Allow", "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS")
+	(*w).Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS")
+}
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write([]byte("Hello world!"))
@@ -59,7 +66,7 @@ func modulesIdSetAutostartHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "PUT":
-		model := response.GetModules{modules}
+		model := response.GetModules{Payload: modules}
 		resp, _ := json.Marshal(model)
 
 		if state == "1" && modules[id].Autostart {
@@ -71,6 +78,60 @@ func modulesIdSetAutostartHandler(w http.ResponseWriter, r *http.Request) {
 		} else if state == "0" && !modules[id].Autostart {
 			fmt.Println("00")
 		}
+
+		w.Write(resp)
+
+	case "OPTIONS":
+		w.WriteHeader(200)
+
+	default:
+		w.WriteHeader(404)
+	}
+}
+
+func modulesIdStartHandler(w http.ResponseWriter, r *http.Request) {
+	setCorsJsonHeaders(&w)
+
+	id := mux.Vars(r)["id"]
+
+	if _, ok := modules[id]; !ok {
+		w.WriteHeader(404)
+		return
+	}
+
+	switch r.Method {
+	case "POST":
+		modules[id].Start()
+
+		model := response.GetModules{Payload: modules}
+		resp, _ := json.Marshal(model)
+
+		w.Write(resp)
+
+	case "OPTIONS":
+		w.WriteHeader(200)
+
+	default:
+		w.WriteHeader(404)
+	}
+}
+
+func modulesIdStopHandler(w http.ResponseWriter, r *http.Request) {
+	setCorsJsonHeaders(&w)
+
+	id := mux.Vars(r)["id"]
+
+	if _, ok := modules[id]; !ok {
+		w.WriteHeader(404)
+		return
+	}
+
+	switch r.Method {
+	case "POST":
+		modules[id].Stop()
+
+		model := response.GetModules{Payload: modules}
+		resp, _ := json.Marshal(model)
 
 		w.Write(resp)
 
