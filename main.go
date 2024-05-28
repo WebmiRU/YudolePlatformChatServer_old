@@ -49,6 +49,7 @@ func main() {
 	}()
 
 	loadConfig()
+	go tcpServer()
 
 	currentDir, _ = os.Getwd()
 	moduleList, _ := os.ReadDir(currentDir + fmt.Sprintf("%c%s", os.PathSeparator, "modules"))
@@ -77,6 +78,8 @@ func main() {
 	router.HandleFunc("/api/modules/{id}/stop", modulesIdStopHandler)
 	router.HandleFunc("/api/modules/{id}/autostart/{state:[0,1]}", modulesIdSetAutostartHandler)
 	http.Handle("/", router)
+
+	http.HandleFunc("/events", eventsHandler)
 
 	http.ListenAndServe(":80", nil)
 }

@@ -29,7 +29,7 @@
                 "description": "",
                 "placeholder": "Login 2",
                 "validation": "",
-                "value": null
+                "value": "Test 1"
             },
             "password": {
                 "type": "string",
@@ -37,7 +37,7 @@
                 "description": "",
                 "placeholder": "Password 2",
                 "validation": "",
-                "value": null
+                "value": "Test 2"
             }
         }
     },
