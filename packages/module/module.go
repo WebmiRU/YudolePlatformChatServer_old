@@ -18,7 +18,7 @@ type Module struct {
 	Exec      *exec.Cmd                    `json:"-"`
 	State     string                       `json:"proc_state"`
 
-	dir        string
+	dir        string `json:"dir"`
 	isRunning  bool
 	configPath string
 }

@@ -54,7 +54,7 @@ func main() {
 	moduleList, _ := os.ReadDir(currentDir + fmt.Sprintf("%c%s", os.PathSeparator, "modules"))
 
 	for _, dir := range moduleList {
-		path := currentDir + "/modules/" + dir.Name()
+		path := currentDir + string(os.PathSeparator) + "modules" + string(os.PathSeparator) + dir.Name()
 
 		var mod module.Module
 		if err := mod.Load(path); err == nil {
