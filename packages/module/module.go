@@ -14,11 +14,11 @@ type Module struct {
 	Name      string                       `json:"name"`
 	Type      string                       `json:"type"`
 	Command   string                       `json:"command"`
-	Dir       string                       `json:"dir"`
 	Params    map[string]map[string]Params `json:"params"`
 	Exec      *exec.Cmd                    `json:"-"`
 	State     string                       `json:"proc_state"`
 
+	dir        string
 	isRunning  bool
 	configPath string
 }
@@ -27,7 +27,7 @@ func (m *Module) Load(configPath string) error {
 	m.Command = m.Command
 	m.configPath = configPath + string(os.PathSeparator) + "module.json"
 	configBytes, _ := os.ReadFile(m.configPath)
-	m.Dir = configPath
+	m.dir = configPath
 
 	if err := json.Unmarshal(configBytes, &m); err != nil {
 		return err
@@ -57,11 +57,11 @@ func (m *Module) Start() error {
 		command := m.Command
 
 		if len(m.Command) >= 2 && m.Command[0:2] == "./" {
-			command = m.Dir + string(os.PathSeparator) + strings.Replace(m.Command, "./", "", 1)
+			command = m.dir + string(os.PathSeparator) + strings.Replace(m.Command, "./", "", 1)
 		}
 
 		m.Exec = exec.Command(command)
-		m.Exec.Dir = m.Dir
+		m.Exec.Dir = m.dir
 	} else {
 		return nil
 	}

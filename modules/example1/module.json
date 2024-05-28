@@ -1,37 +1,45 @@
 {
-  "name": "Example 1 module",
-  "description": "Trovo client module description",
-  "type": "client",
-  "command": "./example1.exe",
-  "params": {
-    "Auth": {
-      "login": {
-        "type": "string",
-        "label": "Login",
-        "description": "Login field long description",
-        "placeholder": "Login",
-        "validation": ""
-      },
-      "password": {
-        "type": "string",
-        "label": "Password",
-        "placeholder": "Password",
-        "validation": ""
-      }
+    "autostart": false,
+    "name": "Example 1 module",
+    "type": "client",
+    "command": "./example1.exe",
+    "params": {
+        "Auth": {
+            "login": {
+                "type": "string",
+                "label": "Login",
+                "description": "Login field long description",
+                "placeholder": "Login",
+                "validation": "",
+                "value": "HelloLogin"
+            },
+            "password": {
+                "type": "string",
+                "label": "Password",
+                "description": "",
+                "placeholder": "Password",
+                "validation": "",
+                "value": "GGPass"
+            }
+        },
+        "Tab 2": {
+            "login": {
+                "type": "string",
+                "label": "Login 2",
+                "description": "",
+                "placeholder": "Login 2",
+                "validation": "",
+                "value": null
+            },
+            "password": {
+                "type": "string",
+                "label": "Password 2",
+                "description": "",
+                "placeholder": "Password 2",
+                "validation": "",
+                "value": null
+            }
+        }
     },
-    "Tab 2": {
-      "login": {
-        "type": "string",
-        "label": "Login 2",
-        "placeholder": "Login 2",
-        "validation": ""
-      },
-      "password": {
-        "type": "string",
-        "label": "Password 2",
-        "placeholder": "Password 2",
-        "validation": ""
-      }
-    }
-  }
+    "proc_state": "failed"
 }
