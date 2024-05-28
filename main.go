@@ -1,20 +1,19 @@
 package main
 
 import (
+	"YudoleChatServer/packages/module"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
 	"os"
-	"os/exec"
-	"slices"
-	"strings"
 	"time"
 )
 
 var config Config
 var currentDir string
-var modules = make(map[string]*Module)
+var modules = make(map[string]*module.Module)
 
 func modulesStateMonitor() {
 	fmt.Println("STR")
@@ -49,63 +48,25 @@ func main() {
 	go modulesStateMonitor()
 
 	currentDir, _ = os.Getwd()
-	extList, _ := os.ReadDir("./modules")
+	moduleList, _ := os.ReadDir(currentDir + "/modules")
 
-	for _, ext := range extList {
-		extDir := "./modules/" + ext.Name()
-		configBytes, _ := os.ReadFile(extDir + string(os.PathSeparator) + "/config.json")
+	for _, dir := range moduleList {
+		path := currentDir + "/modules/" + dir.Name()
 
-		var module Module
-		json.Unmarshal(configBytes, &module)
-
-		if len(module.Command) >= 2 && module.Command[0:2] == "./" {
-			module.Command = currentDir + string(os.PathSeparator) + "modules" + string(os.PathSeparator) + ext.Name() + strings.Replace(module.Command, "./", string(os.PathSeparator), 1)
+		var mod module.Module
+		if err := mod.Load(path); err == nil {
+			modules[dir.Name()] = &mod
+			fmt.Println("ADD MOD")
+		} else {
+			fmt.Println("ADD MOD ERR")
+			log.Println(err)
 		}
 
-		if len(module.Command) > 0 {
-			module.Exec = exec.Command(module.Command)
+		if err := mod.Start(); err != nil {
+			log.Println(err)
+			return
 		}
-
-		module.Path = currentDir + string(os.PathSeparator) + "modules" + string(os.PathSeparator) + ext.Name()
-		module.Autostart = slices.Contains(config.AutostartModules, ext.Name())
-
-		go func(module *Module) {
-			if (*module).Exec == nil {
-				return
-			}
-
-			(*module).ProcState = "run"
-			(*module).Exec.Start()
-			state, _ := (*module).Exec.Process.Wait()
-
-			if state.ExitCode() == 0 {
-				(*module).ProcState = "stopped"
-			} else {
-				(*module).ProcState = "failed"
-			}
-
-		}(&module)
-
-		modules[ext.Name()] = &module
 	}
-
-	//for _, v := range modules {
-	//	if v.Exec == nil {
-	//		continue
-	//	}
-	//
-	//	go func() {
-	//		fmt.Println("PROC START")
-	//		if err := v.Exec.Start(); err != nil {
-	//			log.Fatalln(err)
-	//		}
-	//
-	//		time.Sleep(6 * time.Second)
-	//		fmt.Println("PROC STOP")
-	//
-	//		v.Exec.Process.Kill()
-	//	}()
-	//}
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", indexHandler)

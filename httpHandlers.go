@@ -1,6 +1,7 @@
 package main
 
 import (
+	"YudoleChatServer/packages/response"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -16,10 +17,12 @@ func modulesIndexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	model := GetModulesResponse{modules}
-	response, _ := json.Marshal(model)
+	fmt.Println(modules)
 
-	w.Write(response)
+	model := response.GetModulesResponse{modules}
+	resp, _ := json.Marshal(model)
+
+	w.Write(resp)
 }
 
 func modulesIdHandler(w http.ResponseWriter, r *http.Request) {
@@ -33,13 +36,13 @@ func modulesIdHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	model := GetModulesIdResponse{
+	model := response.GetModulesIdResponse{
 		Payload: modules[id],
 	}
 
-	response, _ := json.Marshal(model)
+	resp, _ := json.Marshal(model)
 
-	w.Write(response)
+	w.Write(resp)
 }
 
 func modulesIdSetAutostartHandler(w http.ResponseWriter, r *http.Request) {
@@ -58,8 +61,8 @@ func modulesIdSetAutostartHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "PUT":
-		model := GetModulesResponse{modules}
-		response, _ := json.Marshal(model)
+		model := response.GetModulesResponse{modules}
+		resp, _ := json.Marshal(model)
 
 		if state == "1" && modules[id].Autostart {
 			fmt.Println("11")
@@ -71,7 +74,7 @@ func modulesIdSetAutostartHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("00")
 		}
 
-		w.Write(response)
+		w.Write(resp)
 
 	case "OPTIONS":
 		w.WriteHeader(200)
