@@ -48,7 +48,7 @@ export default {
       </template>
     </Column>
 
-    <Column header="Active">
+    <Column header="State">
       <template #body="row">
         <Badge v-if="row.data.proc_state == 'run'" severity="success">Run</Badge>
         <Badge v-else-if="row.data.proc_state == 'stopped'" severity="warning">Stopped</Badge>

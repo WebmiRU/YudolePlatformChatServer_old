@@ -1,0 +1,37 @@
+{
+  "name": "Example 2 module",
+  "description": "Example 2 client module description",
+  "type": "client",
+  "command": "./example2.exe",
+  "params": {
+    "Auth": {
+      "login": {
+        "type": "string",
+        "label": "Login",
+        "description": "Login field long description",
+        "placeholder": "Login",
+        "validation": ""
+      },
+      "password": {
+        "type": "string",
+        "label": "Password",
+        "placeholder": "Password",
+        "validation": ""
+      }
+    },
+    "Tab 2": {
+      "login": {
+        "type": "string",
+        "label": "Login 2",
+        "placeholder": "Login 2",
+        "validation": ""
+      },
+      "password": {
+        "type": "string",
+        "label": "Password 2",
+        "placeholder": "Password 2",
+        "validation": ""
+      }
+    }
+  }
+}
