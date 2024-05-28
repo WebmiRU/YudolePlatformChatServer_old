@@ -18,19 +18,19 @@ type Module struct {
 	Params    map[string]map[string]Params `json:"params"`
 	Exec      *exec.Cmd                    `json:"-"`
 	State     string                       `json:"proc_state"`
-	isRunning bool
+
+	isRunning  bool
+	configPath string
 }
 
 func (m *Module) Load(configPath string) error {
-	configBytes, _ := os.ReadFile(configPath + string(os.PathSeparator) + "module.json")
+	m.Command = m.Command
+	m.configPath = configPath + string(os.PathSeparator) + "module.json"
+	configBytes, _ := os.ReadFile(m.configPath)
 	m.Dir = configPath
 
 	if err := json.Unmarshal(configBytes, &m); err != nil {
 		return err
-	}
-
-	if len(m.Command) >= 2 && m.Command[0:2] == "./" {
-		m.Command = m.Dir + string(os.PathSeparator) + strings.Replace(m.Command, "./", "", 1)
 	}
 
 	//if m.Autostart && m.Exec != nil {
@@ -40,9 +40,27 @@ func (m *Module) Load(configPath string) error {
 	return nil
 }
 
+func (m *Module) Save() error {
+	if data, err := json.MarshalIndent(m, "", "    "); err != nil {
+		return err
+	} else {
+		if err := os.WriteFile(m.configPath, data, 0666); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *Module) Start() error {
 	if len(m.Command) > 0 && !m.isRunning {
-		m.Exec = exec.Command(m.Command)
+		command := m.Command
+
+		if len(m.Command) >= 2 && m.Command[0:2] == "./" {
+			command = m.Dir + string(os.PathSeparator) + strings.Replace(m.Command, "./", "", 1)
+		}
+
+		m.Exec = exec.Command(command)
 		m.Exec.Dir = m.Dir
 	} else {
 		return nil

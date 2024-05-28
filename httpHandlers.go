@@ -52,6 +52,11 @@ func modulesIdHandler(w http.ResponseWriter, r *http.Request) {
 
 		// @TODO Parse and update only VALUE field
 		modules[id].Params = mod.Payload.Params
+		if err := modules[id].Save(); err != nil {
+			log.Println(err)
+			w.WriteHeader(400)
+			return
+		}
 	}
 
 	model := resource.Module{

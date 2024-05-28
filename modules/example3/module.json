@@ -1,38 +1,46 @@
 {
-  "name": "Example 3 module",
-  "description": "Example 3 client module description",
-  "type": "client",
-  "command": "./example3.exe",
-  "params": {
-    "Auth": {
-      "login": {
-        "type": "string",
-        "label": "Login",
-        "description": "Login field long description",
-        "placeholder": "Login",
-        "validation": "",
-        "value": "Example-3 module value"
-      },
-      "password": {
-        "type": "string",
-        "label": "Password",
-        "placeholder": "Password",
-        "validation": ""
-      }
+    "autostart": false,
+    "name": "Example 3 module",
+    "type": "client",
+    "command": "C:\\Users\\EWolf\\GolandProjects\\YudoleChatServer/modules/example3\\example3.exe",
+    "dir": "C:\\Users\\EWolf\\GolandProjects\\YudoleChatServer/modules/example3",
+    "params": {
+        "Auth": {
+            "login": {
+                "type": "string",
+                "label": "Login",
+                "description": "Login field long description",
+                "placeholder": "Login",
+                "validation": "",
+                "value": "Example-3 module value45"
+            },
+            "password": {
+                "type": "string",
+                "label": "Password",
+                "description": "",
+                "placeholder": "Password",
+                "validation": "",
+                "value": null
+            }
+        },
+        "Tab 2": {
+            "login": {
+                "type": "string",
+                "label": "Login 2",
+                "description": "",
+                "placeholder": "Login 2",
+                "validation": "",
+                "value": null
+            },
+            "user_count": {
+                "type": "number",
+                "label": "User count",
+                "description": "",
+                "placeholder": "User count placeholder",
+                "validation": "",
+                "value": null
+            }
+        }
     },
-    "Tab 2": {
-      "login": {
-        "type": "string",
-        "label": "Login 2",
-        "placeholder": "Login 2",
-        "validation": ""
-      },
-      "user_count": {
-        "type": "number",
-        "label": "User count",
-        "placeholder": "User count placeholder",
-        "validation": ""
-      }
-    }
-  }
+    "proc_state": "run"
 }
