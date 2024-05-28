@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -22,18 +23,25 @@ type tcpClient struct {
 	conn *net.Conn
 }
 
-func (c *tcpClient) send(message *tcpMessage) {
-	json.NewEncoder(*c.conn).Encode(message)
+func (c *tcpClient) send(message *tcpMessage) error {
+	if err := json.NewEncoder(*c.conn).Encode(message); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (c *tcpClient) drop() {
+func (c *tcpClient) drop() error {
 	delete(tcpClients, c.conn)
 
 	if err := (*c.conn).Close(); err != nil {
-		log.Println("Error closing tcp connection:", err)
+		return err
 	}
+
+	return nil
 }
 
+var tcpClientsMutex sync.Mutex
 var tcpClients = make(map[*net.Conn]*tcpClient)
 
 func tcpServer() {
@@ -41,8 +49,21 @@ func tcpServer() {
 
 	go func() {
 		for {
-			time.Sleep(1 * time.Second)
+			time.Sleep(2 * time.Second)
 			fmt.Println(tcpClients)
+
+			tcpClientsMutex.Lock()
+			for _, v := range tcpClients {
+				if err := v.send(&tcpMessage{
+					Module:  "example4",
+					Type:    "message/chat",
+					Payload: &tcpMessagePayload{},
+				}); err != nil {
+					log.Println("Error sending TCP client message:", err)
+					continue
+				}
+			}
+			tcpClientsMutex.Unlock()
 		}
 	}()
 
@@ -65,12 +86,13 @@ func tcpServer() {
 }
 
 func handleTcpConn(conn net.Conn) {
-	//defer conn.Close()
-	//defer tcpClients[&conn].drop()
+	tcpClientsMutex.Lock()
 
 	tcpClients[&conn] = &tcpClient{
 		conn: &conn,
 	}
+
+	tcpClientsMutex.Unlock()
 
 loop:
 	for {
@@ -89,10 +111,7 @@ loop:
 		fmt.Println("Received data:", msg)
 	}
 
-	tcpClients[&conn].drop()
-
-	//for client := range
-
-	//_, err = conn.Write(message)
-
+	if err := tcpClients[&conn].drop(); err != nil {
+		log.Println("Error closing tcp connection:", err)
+	}
 }
