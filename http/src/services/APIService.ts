@@ -1,11 +1,18 @@
 class APIService {
-    async getModules() {
+    async modulesIndexGet() {
         const response = await fetch('http://127.0.0.1/api/modules')
         return await response.json();
     }
 
-    async getModulesId(id: string) {
+    async modulesIdGet(id: string) {
         const response = await fetch('http://127.0.0.1/api/modules/' + id)
+        return await response.json();
+    }
+
+    async modulesIdPost(id: string) {
+        const response = await fetch('http://127.0.0.1/api/modules/' + id, {
+            method: 'POST',
+        })
         return await response.json();
     }
 

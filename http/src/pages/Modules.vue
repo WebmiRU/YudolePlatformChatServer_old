@@ -20,10 +20,10 @@ export default {
       {label: 'Modules', route: {name: 'modules.index'}}
     ]
 
-    this.model = await APIService.getModules()
+    this.model = await APIService.modulesIndexGet()
 
     this.updateInterval = setInterval(async () => {
-      this.model = await APIService.getModules()
+      this.model = await APIService.modulesIndexGet()
     }, 2000)
   },
   unmounted() {

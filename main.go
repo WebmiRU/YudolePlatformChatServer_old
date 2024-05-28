@@ -8,8 +8,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
+var signals = make(chan os.Signal, 99)
 var config Config
 var currentDir string
 var modules = make(map[string]*module.Module)
@@ -28,6 +31,23 @@ func loadConfig() {
 }
 
 func main() {
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
+
+	go func() {
+		for {
+			select {
+			case <-signals:
+				for _, m := range modules {
+					m.Stop()
+				}
+
+				log.Println("Shutting down...")
+				os.Exit(0)
+			}
+		}
+
+	}()
+
 	loadConfig()
 
 	currentDir, _ = os.Getwd()

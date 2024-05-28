@@ -10,7 +10,8 @@
         "label": "Login",
         "description": "Login field long description",
         "placeholder": "Login",
-        "validation": ""
+        "validation": "",
+        "value": "Example-3 module value"
       },
       "password": {
         "type": "string",
@@ -26,10 +27,10 @@
         "placeholder": "Login 2",
         "validation": ""
       },
-      "password": {
-        "type": "string",
-        "label": "Password 2",
-        "placeholder": "Password 2",
+      "user_count": {
+        "type": "number",
+        "label": "User count",
+        "placeholder": "User count placeholder",
         "validation": ""
       }
     }

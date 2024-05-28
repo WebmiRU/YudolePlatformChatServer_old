@@ -6,4 +6,5 @@ type Params struct {
 	Description string `json:"description"`
 	Placeholder string `json:"placeholder"`
 	Validation  string `json:"validation"`
+	Value       any    `json:"value"`
 }
