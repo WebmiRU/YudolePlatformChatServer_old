@@ -13,6 +13,7 @@ func setCorsJsonHeaders(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Allow", "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS")
 	(*w).Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-type")
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,8 +32,7 @@ func modulesIndexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func modulesIdHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	setCorsJsonHeaders(&w)
 
 	id := mux.Vars(r)["id"]
 
@@ -51,10 +51,7 @@ func modulesIdHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func modulesIdSetAutostartHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Allow", "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS")
-	w.Header().Set("Access-Control-Allow-Methods", "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS")
+	setCorsJsonHeaders(&w)
 
 	id := mux.Vars(r)["id"]
 	state := mux.Vars(r)["state"]

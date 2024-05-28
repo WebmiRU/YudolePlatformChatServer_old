@@ -23,8 +23,8 @@ export default {
     this.model = await APIService.modulesIdGet(this.$route.params.id)
   },
   methods: {
-    save() {
-
+    save(id: string, payload: object) {
+      APIService.modulesIdPut(id, payload)
     }
   }
 }
@@ -52,7 +52,7 @@ export default {
       </div>
 
       <div  class="field gap-1 mb-2">
-        <Button label="Save" severity="success" @click="save"/>
+        <Button label="Save" severity="success" @click="save($route.params.id, this.model)"/>
       </div>
 
     </TabPanel>

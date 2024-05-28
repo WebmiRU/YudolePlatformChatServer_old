@@ -9,9 +9,13 @@ class APIService {
         return await response.json();
     }
 
-    async modulesIdPost(id: string) {
+    async modulesIdPut(id: string, payload: object) {
         const response = await fetch('http://127.0.0.1/api/modules/' + id, {
-            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            method: 'PUT',
+            body: JSON.stringify(payload),
         })
         return await response.json();
     }
