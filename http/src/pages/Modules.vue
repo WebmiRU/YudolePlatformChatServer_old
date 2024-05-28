@@ -28,7 +28,13 @@ export default {
   methods: {
     moduleStateChange(id, state) {
       APIService.putModulesIdSetState(id, state ? 1 : 0)
-    }
+    },
+    async moduleStart(id: string) {
+      this.model = await APIService.modulesIdStart(id)
+    },
+    async moduleStop(id: string) {
+      this.model = await APIService.modulesIdStop(id)
+    },
   }
 }
 </script>
@@ -51,15 +57,14 @@ export default {
     <Column header="State">
       <template #body="row">
         <Badge v-if="row.data.proc_state == 'run'" severity="success">Run</Badge>
-        <Badge v-else-if="row.data.proc_state == 'stopped'" severity="warning">Stopped</Badge>
-        <Badge v-else-if="row.data.proc_state == 'failed'" severity="danger">Failed</Badge>
+        <Badge v-else-if="['stopped', 'failed'].includes(row.data.proc_state)" severity="danger">Stopped</Badge>
       </template>
     </Column>
 
     <Column header="Start/Stop">
       <template #body="row">
-        <Button v-if="row.data.proc_state == 'run'" severity="danger">Stop</Button>
-        <Button v-if="['stopped', 'failed'].includes(row.data.proc_state)" severity="success">Start</Button>
+        <Button v-if="row.data.proc_state == 'run'" @click="moduleStop(row.index)" severity="danger">Stop</Button>
+        <Button v-if="['stopped', 'failed'].includes(row.data.proc_state)" @click="moduleStart(row.index)" severity="success">Start</Button>
       </template>
     </Column>
 

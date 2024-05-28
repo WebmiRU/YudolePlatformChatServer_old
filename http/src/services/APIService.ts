@@ -16,14 +16,14 @@ class APIService {
         return await response.json();
     }
 
-    async modulesIdStart(id: string, state: string) {
+    async modulesIdStart(id: string) {
         const response = await fetch('http://127.0.0.1/api/modules/' + id + '/start', {
             method: 'POST',
         })
         return await response.json();
     }
 
-    async modulesIdStop(id: string, state: string) {
+    async modulesIdStop(id: string) {
         const response = await fetch('http://127.0.0.1/api/modules/' + id + '/stop', {
             method: 'POST',
         })
