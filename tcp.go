@@ -6,24 +6,45 @@ import (
 	"io"
 	"log"
 	"net"
+	"time"
 )
 
 type tcpMessagePayload struct {
 }
 
 type tcpMessage struct {
-	Type    string            `json:"type"`
-	Payload tcpMessagePayload `json:"payload"`
+	Module  string             `json:"module"`
+	Type    string             `json:"type"`
+	Payload *tcpMessagePayload `json:"payload"`
 }
 
 type tcpClient struct {
-	conn net.Conn
+	conn *net.Conn
 }
 
-var tcp map[*net.Conn]*tcpClient
+func (c *tcpClient) send(message *tcpMessage) {
+	json.NewEncoder(*c.conn).Encode(message)
+}
+
+func (c *tcpClient) drop() {
+	delete(tcpClients, c.conn)
+
+	if err := (*c.conn).Close(); err != nil {
+		log.Println("Error closing tcp connection:", err)
+	}
+}
+
+var tcpClients = make(map[*net.Conn]*tcpClient)
 
 func tcpServer() {
 	listener, err := net.Listen("tcp", "0.0.0.0:5127")
+
+	go func() {
+		for {
+			time.Sleep(1 * time.Second)
+			fmt.Println(tcpClients)
+		}
+	}()
 
 	if err != nil {
 		log.Fatalln(err)
@@ -37,14 +58,19 @@ func tcpServer() {
 			continue
 		}
 
-		fmt.Println("TCP client connected:", conn.RemoteAddr().String())
+		log.Println("TCP client connected:", conn.RemoteAddr().String())
 
 		go handleTcpConn(conn)
 	}
 }
 
 func handleTcpConn(conn net.Conn) {
-	defer conn.Close()
+	//defer conn.Close()
+	//defer tcpClients[&conn].drop()
+
+	tcpClients[&conn] = &tcpClient{
+		conn: &conn,
+	}
 
 loop:
 	for {
@@ -61,8 +87,12 @@ loop:
 		}
 
 		fmt.Println("Received data:", msg)
-
 	}
+
+	tcpClients[&conn].drop()
+
+	//for client := range
+
 	//_, err = conn.Write(message)
 
 }
