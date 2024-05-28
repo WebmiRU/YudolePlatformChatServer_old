@@ -10,6 +10,7 @@ export default {
   components: {},
   data() {
     return {
+      updateInterval: null,
       model: {payload: {}},
     }
   },
@@ -21,9 +22,12 @@ export default {
 
     this.model = await APIService.getModules()
 
-    setInterval(async () => {
+    this.updateInterval = setInterval(async () => {
       this.model = await APIService.getModules()
     }, 2000)
+  },
+  unmounted() {
+    clearInterval(this.updateInterval)
   },
   methods: {
     moduleStateChange(id, state) {
