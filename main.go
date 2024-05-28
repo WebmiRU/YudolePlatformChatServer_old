@@ -8,26 +8,11 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 )
 
 var config Config
 var currentDir string
 var modules = make(map[string]*module.Module)
-
-func modulesStateMonitor() {
-	fmt.Println("STR")
-	for {
-		for _, v := range modules {
-			if v.Exec == nil {
-				continue
-			}
-		}
-
-		time.Sleep(1 * time.Second)
-
-	}
-}
 
 func loadConfig() {
 	configBytes, err := os.ReadFile("config.json")
@@ -45,10 +30,8 @@ func loadConfig() {
 func main() {
 	loadConfig()
 
-	go modulesStateMonitor()
-
 	currentDir, _ = os.Getwd()
-	moduleList, _ := os.ReadDir(currentDir + "/modules")
+	moduleList, _ := os.ReadDir(currentDir + fmt.Sprintf("%c%s", os.PathSeparator, "modules"))
 
 	for _, dir := range moduleList {
 		path := currentDir + "/modules/" + dir.Name()

@@ -17,8 +17,6 @@ func modulesIndexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	fmt.Println(modules)
-
 	model := response.GetModules{modules}
 	resp, _ := json.Marshal(model)
 
