@@ -105,6 +105,8 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/", indexHandler)
+	router.Handle("/chat{url:.*}", http.StripPrefix("/chat", http.FileServer(http.Dir("./http/chat"))))
+	router.HandleFunc("/events", eventsHandler)
 	router.HandleFunc("/api/modules", modulesIndexHandler)
 	router.HandleFunc("/api/modules/{id}", modulesIdHandler)
 	router.HandleFunc("/api/modules/{id}/start", modulesIdStartHandler)
@@ -112,7 +114,7 @@ func main() {
 	router.HandleFunc("/api/modules/{id}/autostart/{state:[0,1]}", modulesIdSetAutostartHandler)
 	http.Handle("/", router)
 
-	http.HandleFunc("/events", eventsHandler)
+	//http.HandleFunc("/events", eventsHandler)
 
 	http.ListenAndServe(":80", nil)
 }
