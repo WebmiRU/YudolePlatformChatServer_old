@@ -12,10 +12,21 @@ import (
 	"syscall"
 )
 
+const (
+	TCP uint8 = iota
+	WS
+	SSE
+)
+
+type IClient interface {
+	Send(message any) error
+}
+
 var signals = make(chan os.Signal, 99)
 var config Config
 var currentDir string
 var modules = make(map[string]*module.Module)
+var eventSubs = make(map[string][]IClient)
 
 func loadConfig() {
 	configBytes, err := os.ReadFile("config.json")
@@ -31,6 +42,7 @@ func loadConfig() {
 }
 
 func main() {
+	// Catch shutdown signals
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
 
 	go func() {
