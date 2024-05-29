@@ -1,5 +1,5 @@
 package main
 
 type Config struct {
-	AutostartModules []string `json:"active_modules"`
+	AutostartModules []string `json:"autostart_modules"`
 }

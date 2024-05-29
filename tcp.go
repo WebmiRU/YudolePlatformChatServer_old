@@ -1,12 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net"
+	"slices"
 	"sync"
 	"time"
 )
@@ -16,8 +16,15 @@ type tcpMessagePayload struct {
 
 type tcpMessage struct {
 	Module  string `json:"module"`
-	Type    string `json:"type"`
+	Event   string `json:"event"`
 	Payload any    `json:"payload"`
+}
+
+type tcpMessageRaw struct {
+	//Id      string          `json:"id"`
+	Module  string          `json:"module"`
+	Event   string          `json:"event"`
+	Payload json.RawMessage `json:"payload"`
 }
 
 type tcpClient struct {
@@ -58,7 +65,7 @@ func tcpServer() {
 			for _, v := range tcpClients {
 				if err := v.Send(&tcpMessage{
 					Module:  "example4",
-					Type:    "message/chat",
+					Event:   "message/chat",
 					Payload: &tcpMessagePayload{},
 				}); err != nil {
 					log.Println("Error sending TCP client message:", err)
@@ -98,8 +105,7 @@ func handleTcpConn(conn net.Conn) {
 
 loop:
 	for {
-		var msg tcpMessage
-		//if err := json.NewDecoder(conn).Decode(&msg); err != nil {
+		var msg tcpMessageRaw
 		if err := json.NewDecoder(conn).Decode(&msg); err != nil {
 			switch err {
 			case io.EOF:
@@ -111,36 +117,51 @@ loop:
 			}
 		}
 
-		// @TODO refactoring needed, draft/demo
-		switch msg.Type {
-		case "subscribe/event":
-			//fmt.Println("subscribe/event")
-			fmt.Println("subscribe/event:", msg.Payload)
+		if !slices.Contains(events, msg.Event) {
+			log.Println("Unknown event for subscribe:", msg.Event)
+			continue
+		}
 
-			// WORK
-			var bf bytes.Buffer
-			err := json.NewEncoder(&bf).Encode(msg.Payload)
-			if err != nil {
-				log.Println("Error encoding payload:", err)
+		fmt.Println("Received message event:", msg.Event)
+
+		switch msg.Event {
+		case "event/subscribe":
+			var payload []string
+			json.Unmarshal(msg.Payload, &payload)
+
+			for _, event := range payload {
+				if _, ok := eventSubs[event]; !ok {
+					fmt.Println("UNKNOWN EVENT", event)
+					continue
+				}
+
+				eventSubsMutex.Lock()
+				eventSubs[event] = append(eventSubs[event], tcpClients[&conn])
+				eventSubsMutex.Unlock()
 			}
 
-			fmt.Println("BYTES:", bf.Bytes())
-			fmt.Printf("BYTES STRING: %s\n", bf.Bytes())
-			var v1 []string
-			err1 := json.NewDecoder(&bf).Decode(&v1)
-			if err1 != nil {
-				fmt.Println("Error decoding payload:", err1)
-				continue
+		case "event/unsubscribe":
+			var payload []string
+			json.Unmarshal(msg.Payload, &payload)
+
+			for _, event := range payload {
+				if _, ok := eventSubs[event]; !ok {
+					fmt.Println("UNKNOWN EVENT", event)
+					continue
+				}
+
+				eventSubsMutex.Lock()
+				delIdx := slices.Index(eventSubs[event], tcpClients[&conn])
+
+				if delIdx >= 0 {
+					eventSubs[event] = slices.Delete(eventSubs[event], delIdx, delIdx+1)
+				}
+
+				eventSubsMutex.Unlock()
 			}
 
-			for _, v := range v1 {
-				fmt.Println("SUB STRING:", v)
-			}
-
-		case "message/chat":
-			fmt.Println("message/chat:", msg.Payload)
 		default:
-			log.Println("Unknown message type:", msg.Type)
+			log.Println("Unknown message type:", msg.Event)
 		}
 		fmt.Println("Received data:", msg)
 	}

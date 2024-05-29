@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 )
 
@@ -26,42 +27,58 @@ var signals = make(chan os.Signal, 99)
 var config Config
 var currentDir string
 var modules = make(map[string]*module.Module)
+var events = []string{"stream/chat/message", "stream/chat/private_message"} // All known events
 var eventSubs = make(map[string][]IClient)
+var eventSubsMutex sync.Mutex
 
-func loadConfig() {
-	configBytes, err := os.ReadFile("config.json")
+func Init() {
+	// Catch shutdown signals from OS
+	signal.Notify(signals, syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
+	go shutdown()
+
+	// Loading local config file
+	configFile, err := os.Open("config.json")
 
 	if err != nil {
-		panic("Error while reading 'config.json' file")
+		panic("Error while reading \"config.json\" file")
 	}
 
-	if json.Unmarshal(configBytes, &config) != nil {
-		panic("Error while parsing 'config.json' file")
+	if err := json.NewDecoder(configFile).Decode(&config); err != nil {
+		panic("Error while parsing \"config.json\" file")
 	}
 
+	// Init event subscriptions variable
+	for _, event := range events {
+		eventSubsMutex.Lock()
+		eventSubs[event] = make([]IClient, 0)
+		eventSubsMutex.Unlock()
+	}
+
+	// Run TCP server
+	go tcpServer()
+}
+
+func shutdown() {
+	for {
+		select {
+		case <-signals:
+			for _, m := range modules {
+				m.Stop()
+			}
+
+			log.Println("Shutting down...")
+			os.Exit(0)
+		}
+	}
 }
 
 func main() {
-	// Catch shutdown signals
-	signal.Notify(signals, syscall.SIGINT, syscall.SIGKILL, syscall.SIGTERM)
 
 	go func() {
-		for {
-			select {
-			case <-signals:
-				for _, m := range modules {
-					m.Stop()
-				}
-
-				log.Println("Shutting down...")
-				os.Exit(0)
-			}
-		}
 
 	}()
 
-	loadConfig()
-	go tcpServer()
+	Init()
 
 	currentDir, _ = os.Getwd()
 	moduleList, _ := os.ReadDir(currentDir + fmt.Sprintf("%c%s", os.PathSeparator, "modules"))
