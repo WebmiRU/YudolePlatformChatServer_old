@@ -39,8 +39,24 @@ func (c *tcpClient) Send(message any) error {
 	return nil
 }
 
-func (c *tcpClient) drop() error {
+func (c *tcpClient) Drop() error {
 	delete(tcpClients, c.conn)
+
+	tcpClientsMutex.Lock()
+	tcpEventSubsMutex.Lock()
+
+	for event, clients := range tcpEventSubs {
+		idx := slices.Index(clients, c)
+
+		if idx == -1 {
+			continue
+		}
+
+		tcpEventSubs[event] = slices.Delete(clients, idx, idx+1)
+	}
+
+	tcpEventSubsMutex.Unlock()
+	tcpClientsMutex.Unlock()
 
 	if err := (*c.conn).Close(); err != nil {
 		return err
@@ -149,20 +165,19 @@ loop:
 				}
 
 				tcpEventSubsMutex.Lock()
-				//if !slices.Contains(tcpEventSubs[event], tcpClients[&conn]) {
-				tcpEventSubs[event] = append(tcpEventSubs[event], tcpClients[&conn])
-				//}
+				if !slices.Contains(tcpEventSubs[event], tcpClients[&conn]) {
+					tcpEventSubs[event] = append(tcpEventSubs[event], tcpClients[&conn])
+				}
 				tcpEventSubsMutex.Unlock()
 			}
 
 		case "event/unsubscribe":
-			log.Println("UN SUBSCRIBE")
 			var payload []string
 			json.Unmarshal(msg.Payload, &payload)
 
 			for _, event := range payload {
 				if !slices.Contains(events, event) {
-					fmt.Println("UNKNOWN EVENT", event)
+					log.Println("UNKNOWN EVENT", event)
 					continue
 				}
 
@@ -176,20 +191,22 @@ loop:
 				tcpEventSubs[event] = slices.Delete(tcpEventSubs[event], idx, idx+1)
 				tcpEventSubsMutex.Unlock()
 			}
-
-			//default:
-			//	log.Println("Unknown message type:", msg.Type)
 		}
 
+		tcpEventSubsMutex.Lock()
 		for _, client := range tcpEventSubs[msg.Type] {
-			client.Send(msg)
+			if err := client.Send(msg); err != nil {
+				log.Println("Error sending message:", err)
+				client.Drop()
+				return
+			}
 		}
+		tcpEventSubsMutex.Unlock()
 
 		//fmt.Println("Received data:", msg)
-
 	}
 
-	if err := tcpClients[&conn].drop(); err != nil {
+	if err := tcpClients[&conn].Drop(); err != nil {
 		log.Println("Error closing tcp connection:", err)
 	}
 }
