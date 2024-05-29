@@ -40,10 +40,11 @@ func (c *tcpClient) Send(message any) error {
 }
 
 func (c *tcpClient) Drop() error {
-	delete(tcpClients, c.conn)
 
 	tcpClientsMutex.Lock()
 	tcpEventSubsMutex.Lock()
+
+	delete(tcpClients, c.conn)
 
 	for event, clients := range tcpEventSubs {
 		idx := slices.Index(clients, c)
@@ -83,21 +84,8 @@ func tcpServer() {
 	go func() {
 		for {
 			time.Sleep(2 * time.Second)
-			fmt.Println("TCP CLIENTS", tcpClients)
-			fmt.Println("TCP EVENT SUBS", tcpEventSubs)
-
-			//tcpClientsMutex.Lock()
-			//for _, v := range tcpClients {
-			//	if err := v.Send(&tcpMessage{
-			//		Module:  "example4",
-			//		Type:    "message/chat",
-			//		Payload: &tcpMessagePayload{},
-			//	}); err != nil {
-			//		log.Println("Error sending TCP client message:", err)
-			//		continue
-			//	}
-			//}
-			//tcpClientsMutex.Unlock()
+			//fmt.Println("TCP CLIENTS", tcpClients)
+			//fmt.Println("TCP EVENT SUBS", tcpEventSubs)
 		}
 	}()
 
@@ -147,7 +135,15 @@ loop:
 			continue
 		}
 
-		fmt.Println("Received message type:", msg.Type)
+		// @TODO for testing
+		for _, v := range sseEventSubs[msg.Type] {
+			err := v.Send(msg)
+			if err != nil {
+				fmt.Println("Error sending message:", err)
+			}
+		}
+
+		//fmt.Println("Received message type:", msg.Type)
 
 		switch msg.Type {
 		case "event/subscribe":

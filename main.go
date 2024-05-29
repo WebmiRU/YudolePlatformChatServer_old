@@ -10,16 +10,24 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
-const (
-	TCP uint8 = iota
-	WS
-	SSE
-)
+//const (
+//	TCP uint8 = iota
+//	WS
+//	SSE
+//)
+//
+//type IClient interface {
+//	Send(message any) error
+//}
 
-type IClient interface {
-	Send(message any) error
+type Message struct {
+	Id      string `json:"id"`
+	Module  string `json:"module"`
+	Type    string `json:"type"`
+	Payload any    `json:"payload"`
 }
 
 var signals = make(chan os.Signal, 99)
@@ -67,7 +75,11 @@ func shutdown() {
 func main() {
 
 	go func() {
-
+		for {
+			fmt.Println(sseClients)
+			fmt.Println(sseEventSubs)
+			time.Sleep(2 * time.Second)
+		}
 	}()
 
 	Init()
