@@ -16,14 +16,14 @@ type tcpMessagePayload struct {
 
 type tcpMessage struct {
 	Module  string `json:"module"`
-	Event   string `json:"event"`
+	Type    string `json:"type"`
 	Payload any    `json:"payload"`
 }
 
 type tcpMessageRaw struct {
 	//Id      string          `json:"id"`
 	Module  string          `json:"module"`
-	Event   string          `json:"event"`
+	Type    string          `json:"type"`
 	Payload json.RawMessage `json:"payload"`
 }
 
@@ -50,29 +50,38 @@ func (c *tcpClient) drop() error {
 }
 
 var tcpClientsMutex sync.Mutex
+var tcpEventSubsMutex sync.Mutex
 var tcpClients = make(map[*net.Conn]*tcpClient)
+var tcpEventSubs = make(map[string][]*tcpClient) // [EventType]TcpClient
 
 func tcpServer() {
+	// Init event subscriptions variable
+	for _, event := range events {
+		tcpEventSubsMutex.Lock()
+		tcpEventSubs[event] = make([]*tcpClient, 0)
+		tcpEventSubsMutex.Unlock()
+	}
+
 	listener, err := net.Listen("tcp", "0.0.0.0:5127")
 
 	go func() {
 		for {
 			time.Sleep(2 * time.Second)
 			fmt.Println("TCP CLIENTS", tcpClients)
-			fmt.Println("EVENT SUBS", eventSubs)
+			fmt.Println("TCP EVENT SUBS", tcpEventSubs)
 
-			tcpClientsMutex.Lock()
-			for _, v := range tcpClients {
-				if err := v.Send(&tcpMessage{
-					Module:  "example4",
-					Event:   "message/chat",
-					Payload: &tcpMessagePayload{},
-				}); err != nil {
-					log.Println("Error sending TCP client message:", err)
-					continue
-				}
-			}
-			tcpClientsMutex.Unlock()
+			//tcpClientsMutex.Lock()
+			//for _, v := range tcpClients {
+			//	if err := v.Send(&tcpMessage{
+			//		Module:  "example4",
+			//		Type:    "message/chat",
+			//		Payload: &tcpMessagePayload{},
+			//	}); err != nil {
+			//		log.Println("Error sending TCP client message:", err)
+			//		continue
+			//	}
+			//}
+			//tcpClientsMutex.Unlock()
 		}
 	}()
 
@@ -117,53 +126,67 @@ loop:
 			}
 		}
 
-		if !slices.Contains(events, msg.Event) {
-			log.Println("Unknown event for subscribe:", msg.Event)
+		if !slices.Contains(events, msg.Type) {
+			log.Println("Unknown type for subscribe:", msg.Type)
 			continue
 		}
 
-		fmt.Println("Received message event:", msg.Event)
+		fmt.Println("Received message type:", msg.Type)
 
-		switch msg.Event {
+		switch msg.Type {
 		case "event/subscribe":
+			log.Println("SUBSCRIBE")
 			var payload []string
-			json.Unmarshal(msg.Payload, &payload)
+			if err := json.Unmarshal(msg.Payload, &payload); err != nil {
+				log.Println("Error decoding payload:", err.Error())
+				continue
+			}
 
 			for _, event := range payload {
-				if _, ok := eventSubs[event]; !ok {
+				if !slices.Contains(events, event) {
 					fmt.Println("UNKNOWN EVENT", event)
 					continue
 				}
 
-				eventSubsMutex.Lock()
-				eventSubs[event] = append(eventSubs[event], tcpClients[&conn])
-				eventSubsMutex.Unlock()
+				tcpEventSubsMutex.Lock()
+				//if !slices.Contains(tcpEventSubs[event], tcpClients[&conn]) {
+				tcpEventSubs[event] = append(tcpEventSubs[event], tcpClients[&conn])
+				//}
+				tcpEventSubsMutex.Unlock()
 			}
 
 		case "event/unsubscribe":
+			log.Println("UN SUBSCRIBE")
 			var payload []string
 			json.Unmarshal(msg.Payload, &payload)
 
 			for _, event := range payload {
-				if _, ok := eventSubs[event]; !ok {
+				if !slices.Contains(events, event) {
 					fmt.Println("UNKNOWN EVENT", event)
 					continue
 				}
 
-				eventSubsMutex.Lock()
-				delIdx := slices.Index(eventSubs[event], tcpClients[&conn])
+				tcpEventSubsMutex.Lock()
+				idx := slices.Index(tcpEventSubs[event], tcpClients[&conn])
 
-				if delIdx >= 0 {
-					eventSubs[event] = slices.Delete(eventSubs[event], delIdx, delIdx+1)
+				if idx == -1 {
+					continue
 				}
 
-				eventSubsMutex.Unlock()
+				tcpEventSubs[event] = slices.Delete(tcpEventSubs[event], idx, idx+1)
+				tcpEventSubsMutex.Unlock()
 			}
 
-		default:
-			log.Println("Unknown message type:", msg.Event)
+			//default:
+			//	log.Println("Unknown message type:", msg.Type)
 		}
-		fmt.Println("Received data:", msg)
+
+		for _, client := range tcpEventSubs[msg.Type] {
+			client.Send(msg)
+		}
+
+		//fmt.Println("Received data:", msg)
+
 	}
 
 	if err := tcpClients[&conn].drop(); err != nil {

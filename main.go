@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 )
 
@@ -27,9 +26,9 @@ var signals = make(chan os.Signal, 99)
 var config Config
 var currentDir string
 var modules = make(map[string]*module.Module)
-var events = []string{"stream/chat/message", "stream/chat/private_message"} // All known events
-var eventSubs = make(map[string][]IClient)
-var eventSubsMutex sync.Mutex
+var events = []string{"event/subscribe", "event/unsubscribe", "stream/chat/message", "stream/chat/private_message"} // All known events
+//var eventSubs = make(map[string][]*IClient)
+//var eventSubsMutex sync.Mutex
 
 func Init() {
 	// Catch shutdown signals from OS
@@ -45,13 +44,6 @@ func Init() {
 
 	if err := json.NewDecoder(configFile).Decode(&config); err != nil {
 		panic("Error while parsing \"config.json\" file")
-	}
-
-	// Init event subscriptions variable
-	for _, event := range events {
-		eventSubsMutex.Lock()
-		eventSubs[event] = make([]IClient, 0)
-		eventSubsMutex.Unlock()
 	}
 
 	// Run TCP server
